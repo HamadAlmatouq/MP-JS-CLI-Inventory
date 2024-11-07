@@ -85,7 +85,7 @@ export function updateGame() {
           if (name) game.name = name;
           if (publisher) game.publisher = publisher;
           if (genre) game.genre = genre;
-          if (published) game.published = published;
+          if (published) game.published = parseInt(published);
           console.log(`Updated ${game.name}.`);
           showMenu();
         });
@@ -126,14 +126,14 @@ export function viewGames() {
   showMenu();
 }
 
-//Added filter
+//Added filter by
 export function filterGames() {
   inquirer
     .prompt([
       {
         type: "list",
         name: "criterion",
-        message: "Fiter by:",
+        message: "Filter by:",
         choices: [
           { name: "Name", value: "name" },
           { name: "Publisher", value: "publisher" },
