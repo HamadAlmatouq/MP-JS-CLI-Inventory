@@ -1,13 +1,13 @@
 import inquirer from "inquirer";
 
-import Book from "./Book.js";
+import Game from "./game.js";
 import showMenu from "./menu.js";
 
-export function addBook() {
+export function addGame() {
   inquirer
     .prompt([
-      { name: "title", message: "Enter book title:" },
-      { name: "author", message: "Enter the author name:" },
+      { name: "name", message: "Enter game name:" },
+      { name: "publisher", message: "Enter the publisher name:" },
       { name: "genre", message: "Enter the genre:" },
       {
         name: "published",
@@ -20,22 +20,22 @@ export function addBook() {
           }
           return (
             yearNum <= new Date().getFullYear() ||
-            "This book was published in the future??"
+            "This game was published in the future??"
           );
         },
       },
     ])
-    .then((book) => {
-      Book.create(book);
-      console.log(`Added ${book.title} by ${book.author}.`);
+    .then((game) => {
+      Game.create(game);
+      console.log(`Added ${game.title} by ${game.author}.`);
       showMenu();
     });
 }
 
-export function updateBook() {
-  const books = Book.find();
-  if (books.length === 0) {
-    console.log("No books available to update.");
+export function updateGame() {
+  const games = Game.find();
+  if (games.length === 0) {
+    console.log("No games available to update.");
     return showMenu();
   }
 
@@ -43,22 +43,22 @@ export function updateBook() {
     .prompt([
       {
         type: "list",
-        name: "bookId",
-        message: "Choose a book to update:",
-        choices: books.map((book) => ({ name: book.title, value: book.id })),
+        name: "gameId",
+        message: "Choose a game to update:",
+        choices: games.map((game) => ({ name: game.name, value: game.id })),
       },
     ])
-    .then(({ bookId }) => {
-      const book = Book.findById(bookId);
+    .then(({ gameId }) => {
+      const game = Game.findById(gameId);
       inquirer
         .prompt([
           {
-            name: "title",
-            message: "Enter new title (leave blank to keep current):",
+            name: "name",
+            message: "Enter new game name (leave blank to keep current):",
           },
           {
-            name: "author",
-            message: "Enter new author (leave blank to keep current):",
+            name: "publisher",
+            message: "Enter new publisher (leave blank to keep current):",
           },
           {
             name: "genre",
@@ -75,27 +75,27 @@ export function updateBook() {
               }
               return (
                 yearNum <= new Date().getFullYear() ||
-                "This book was published in the future??"
+                "This game was published in the future??"
               );
             },
           },
         ])
         .then((updates) => {
-          const { title, author, genre, published } = updates;
-          if (title) book.title = title;
-          if (author) book.author = author;
-          if (genre) book.genre = genre;
-          if (published) book.published = published;
-          console.log(`Updated ${book.title}.`);
+          const { name, publisher, genre, published } = updates;
+          if (name) game.name = name;
+          if (publisher) game.publisher = publisher;
+          if (genre) game.genre = genre;
+          if (published) game.published = published;
+          console.log(`Updated ${game.name}.`);
           showMenu();
         });
     });
 }
 
-export function deleteBook() {
-  const books = Book.find();
-  if (books === 0) {
-    console.log("No books available to delete.");
+export function deleteGame() {
+  const games = Game.find();
+  if (games === 0) {
+    console.log("No games available to delete.");
     return showMenu();
   }
 
@@ -103,25 +103,82 @@ export function deleteBook() {
     .prompt([
       {
         type: "list",
-        name: "bookId",
-        message: "Choose a book to delete:",
-        choices: books.map((book) => ({ name: book.title, value: book.id })),
+        name: "gameId",
+        message: "Choose a game to delete:",
+        choices: games.map((game) => ({ name: game.name, value: game.id })),
       },
     ])
-    .then(({ bookId }) => {
-      Book.delete(bookId);
-      console.log(`Deleted book: "${bookId}".`);
+    .then(({ gameId }) => {
+      Game.delete(gameId);
+      console.log(`Deleted a game: "${gameId}".`);
       showMenu();
     });
 }
 
-export function viewBooks() {
-  const books = Book.find();
-  console.log("\nCurrent Book Catalgoue:");
-  if (books.length === 0) {
-    console.log("No books in the catalgoue.");
+export function viewGames() {
+  const games = Game.find();
+  console.log("\nCurrent Game Catalgoue:");
+  if (games.length === 0) {
+    console.log("No Games in the catalgoue.");
   } else {
-    console.table(books, ["title", "author", "genre", "published"]);
+    console.table(games, ["name", "publisher", "genre", "published"]);
   }
   showMenu();
+}
+
+//Added filter
+export function filterGames() {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "criterion",
+        message: "Fiter by:",
+        choices: [
+          { name: "Name", value: "name" },
+          { name: "Publisher", value: "publisher" },
+          { name: "Genre", value: "genre" },
+          { name: "Published Year", value: "published" },
+        ],
+      },
+    ])
+    .then(({ criterion }) => {
+      inquirer
+
+        .prompt([
+          {
+            name: "value",
+            message: `Enter the ${criterion} to filter by:`,
+          },
+        ])
+        .then(({ value }) => {
+          const games = Game.find();
+          let filteredGames;
+
+          if (criterion === "published") {
+            const year = parseInt(value, 10);
+            if (isNaN(year)) {
+              console.log("Please enter a valid year.");
+              return showMenu();
+            }
+            filteredGames = games.filter((game) => game.published === year);
+          } else {
+            filteredGames = games.filter((game) =>
+              game[criterion].toLowerCase().includes(value.toLowerCase())
+            );
+          }
+
+          if (filteredGames.length === 0) {
+            console.log("No games found with that filter.");
+          } else {
+            console.table(filteredGames, [
+              "name",
+              "publisher",
+              "genre",
+              "published",
+            ]);
+          }
+          showMenu();
+        });
+    });
 }

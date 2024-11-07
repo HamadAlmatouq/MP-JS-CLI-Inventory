@@ -1,14 +1,21 @@
 import inquirer from "inquirer";
 
-import { addBook, deleteBook, updateBook, viewBooks } from "./controllers.js";
+import {
+  addGame,
+  deleteGame,
+  updateGame,
+  viewGames,
+  filterGames,
+} from "./controllers.js";
 
 function showMenu() {
   console.log("\n");
   const choices = [
-    { name: "Add a book", value: "add" },
-    { name: "Update a book", value: "update" },
-    { name: "Delete a book", value: "delete" },
-    { name: "View all books", value: "list" },
+    { name: "Add a Game", value: "add" },
+    { name: "Update a Game", value: "update" },
+    { name: "Delete a Game", value: "delete" },
+    { name: "View all Games", value: "list" },
+    { name: "Filter Games", value: "filter" },
     { name: "Exit", value: "exit" },
   ];
   inquirer
@@ -23,17 +30,19 @@ function showMenu() {
     .then((answers) => {
       switch (answers.action) {
         case "add":
-          addBook();
+          addGame();
           break;
         case "update":
-          updateBook();
+          updateGame();
           break;
         case "delete":
-          deleteBook();
+          deleteGame();
           break;
         case "list":
-          viewBooks();
+          viewGames();
           break;
+        case "filter":
+          filterGames();
         case "exit":
           console.log("Exiting the program.");
           break;
